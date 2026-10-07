@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Maestro Web Studio v4.3 — Visible Arpeggio</title>
+<title>Maestro Web Studio v4.4 — Working Repeats</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#1a1a1a;color:#e8e8e8;user-select:none}
@@ -42,6 +42,12 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 
 #btnArp.active{background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;box-shadow:0 0 0 2px rgba(244,63,94,.5),0 0 14px rgba(244,63,94,.6)}
 #btnTab.active{background:linear-gradient(135deg,#22d3ee,#0891b2);color:#fff;box-shadow:0 0 0 2px rgba(34,211,238,.5)}
+
+/* repeat buttons */
+#btnRepeatStart.active{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 0 0 2px rgba(249,115,22,.5)}
+#btnRepeatEnd.active{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 0 0 2px rgba(249,115,22,.5)}
+.repeat-target{padding:3px 8px;border-radius:6px;background:#1a1a1a;border:1px solid #444;color:#fbbf24;font-size:11px;font-weight:700;letter-spacing:.4px;white-space:nowrap}
+.repeat-target b{color:#fff}
 
 .sel-btn{height:36px;border-radius:6px;background:#333;color:#ddd;border:0;padding:0 8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer}
 .sel-btn:hover{background:#3d3d3d}
@@ -82,6 +88,8 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .tab-badge{background:linear-gradient(135deg,#22d3ee,#0891b2);color:#fff;font-style:normal;font-weight:700;font-size:11px;padding:4px 10px;border-radius:12px;letter-spacing:.5px;display:none}
 .tab-badge.on{display:inline-block}
+.repeat-badge{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-style:normal;font-weight:700;font-size:11px;padding:4px 10px;border-radius:12px;letter-spacing:.5px;display:none}
+.repeat-badge.on{display:inline-block}
 
 .finger-legend{display:flex;gap:6px;font-style:normal;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;background:#2a2a2a;border:1px solid #3a3a3a}
 .finger-legend span{padding:1px 5px;border-radius:5px;color:#111}
@@ -108,7 +116,10 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 .ledger{stroke:#888;stroke-width:1.2}
 .clef{fill:#e8e8e8;font-family:Georgia,serif}
 .time-sig{fill:#e8e8e8;font-family:Georgia,serif;font-weight:bold}
-.measure-num{fill:#888;font-size:11px;font-family:Arial,sans-serif}
+.measure-num{fill:#888;font-size:11px;font-family:Arial,sans-serif;cursor:pointer}
+.measure-num:hover{fill:#fbbf24}
+.measure-num.selected{fill:#fbbf24;font-weight:700}
+.measure-num.has-repeat{fill:#f97316;font-weight:700}
 .dyn-mark{fill:#ddd;font-family:Georgia,serif;font-style:italic;font-weight:bold}
 .tuplet-num{fill:#ccc;font-size:11px}
 .needs-barline{fill:#e0a34c;font-size:10px;font-weight:bold;font-family:Arial;letter-spacing:.5px}
@@ -122,32 +133,30 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 .ghost-measure:hover{stroke:#fbbf24;stroke-dasharray:none}
 .ghost-plus{fill:#555;font-size:28px;font-family:Arial;text-anchor:middle;pointer-events:none}
 
+/* ---------- repeat signs ---------- */
+.repeat-dot{fill:#f97316}
+.repeat-line{stroke:#f97316;stroke-width:3}
+.repeat-line-thin{stroke:#f97316;stroke-width:1.4}
+.repeat-marker{fill:#f97316;font-size:10px;font-family:Arial;font-weight:700;letter-spacing:.5px}
+
 /* ---------- ARPEGGIO COLORING per finger ---------- */
 .arp-note .note-halo{fill:rgba(255,255,255,.08)}
-
-.arp-note.arp-fp .note-head,
-.arp-note.arp-fp .note-flag{fill:#ef4444 !important}
+.arp-note.arp-fp .note-head,.arp-note.arp-fp .note-flag{fill:#ef4444 !important}
 .arp-note.arp-fp .note-head.open{fill:none !important;stroke:#ef4444 !important;stroke-width:1.8}
 .arp-note.arp-fp .note-stem{stroke:#ef4444 !important}
 .arp-note.arp-fp .note-acc{fill:#ef4444 !important}
 .arp-note.arp-fp .note-halo{fill:rgba(239,68,68,.22)}
-
-.arp-note.arp-fi .note-head,
-.arp-note.arp-fi .note-flag{fill:#3b82f6 !important}
+.arp-note.arp-fi .note-head,.arp-note.arp-fi .note-flag{fill:#3b82f6 !important}
 .arp-note.arp-fi .note-head.open{fill:none !important;stroke:#3b82f6 !important;stroke-width:1.8}
 .arp-note.arp-fi .note-stem{stroke:#3b82f6 !important}
 .arp-note.arp-fi .note-acc{fill:#3b82f6 !important}
 .arp-note.arp-fi .note-halo{fill:rgba(59,130,246,.22)}
-
-.arp-note.arp-fm .note-head,
-.arp-note.arp-fm .note-flag{fill:#22c55e !important}
+.arp-note.arp-fm .note-head,.arp-note.arp-fm .note-flag{fill:#22c55e !important}
 .arp-note.arp-fm .note-head.open{fill:none !important;stroke:#22c55e !important;stroke-width:1.8}
 .arp-note.arp-fm .note-stem{stroke:#22c55e !important}
 .arp-note.arp-fm .note-acc{fill:#22c55e !important}
 .arp-note.arp-fm .note-halo{fill:rgba(34,197,94,.22)}
-
-.arp-note.arp-fa .note-head,
-.arp-note.arp-fa .note-flag{fill:#a855f7 !important}
+.arp-note.arp-fa .note-head,.arp-note.arp-fa .note-flag{fill:#a855f7 !important}
 .arp-note.arp-fa .note-head.open{fill:none !important;stroke:#a855f7 !important;stroke-width:1.8}
 .arp-note.arp-fa .note-stem{stroke:#a855f7 !important}
 .arp-note.arp-fa .note-acc{fill:#a855f7 !important}
@@ -158,7 +167,6 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 .tab-num{fill:#e8e8e8;font-size:13px;font-weight:700;font-family:"Courier New",monospace}
 .tab-clef{fill:#cfcfcf;font-family:Georgia,serif;font-size:13px;letter-spacing:1.5px}
 .tab-string-label{fill:#7a7a7a;font-size:9px;font-family:Arial}
-
 .tab-num-arp{font-size:13px;font-weight:800;font-family:"Courier New",monospace}
 .tab-num-arp.tab-fp{fill:#ef4444}
 .tab-num-arp.tab-fi{fill:#3b82f6}
@@ -168,13 +176,11 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 .tab-halo.tab-fi{fill:rgba(59,130,246,.18);stroke:#3b82f6;stroke-width:1;stroke-opacity:.6}
 .tab-halo.tab-fm{fill:rgba(34,197,94,.18);stroke:#22c55e;stroke-width:1;stroke-opacity:.6}
 .tab-halo.tab-fa{fill:rgba(168,85,247,.18);stroke:#a855f7;stroke-width:1;stroke-opacity:.6}
-
 .tab-finger{font-size:11px;font-family:Georgia,serif;font-style:italic;font-weight:800}
 .finger-p{fill:#ef4444}
 .finger-i{fill:#3b82f6}
 .finger-m{fill:#22c55e}
 .finger-a{fill:#a855f7}
-
 .staff-finger{font-size:11px;font-weight:800;font-family:Georgia,serif;font-style:italic}
 
 .drop-overlay{position:fixed;inset:0;background:rgba(26,26,26,.92);z-index:200;display:none;align-items:center;justify-content:center;pointer-events:none}
@@ -242,14 +248,21 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
     <div class="toolbar-viewport" id="toolbarViewport">
       <div class="toolbar-track" id="toolbarTrack">
 
-        <!-- 1 : TAB + ARP (left) -->
+        <!-- 1 : TAB + ARP -->
         <div class="section" style="--accent:#f43f5e">
           <span class="section-num">1</span>
           <div class="section-row" id="rowArp"></div>
         </div>
 
-        <div class="section" style="--accent:#a855f7">
+        <!-- 2 : REPEAT (new) -->
+        <div class="section" style="--accent:#f97316">
           <span class="section-num">2</span>
+          <div class="section-row" id="rowRepeat"></div>
+        </div>
+
+        <!-- 3 : file / undo / redo -->
+        <div class="section" style="--accent:#a855f7">
+          <span class="section-num">3</span>
           <div class="section-row">
             <button class="icon-btn wide" id="btnSettings" title="File menu">⚙︎</button>
             <button class="icon-btn undo-btn" id="btnUndo" title="Undo (Ctrl+Z)" disabled>
@@ -261,19 +274,20 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
           </div>
         </div>
 
-        <div class="section" style="--accent:#ec4899"><span class="section-num">3</span><div class="section-row">
+        <!-- 4 : play / zoom -->
+        <div class="section" style="--accent:#ec4899"><span class="section-num">4</span><div class="section-row">
           <button class="icon-btn" id="btnPlay">▶</button>
           <button class="icon-btn" id="btnStop">■</button>
           <button class="icon-btn" id="btnZoomIn">＋</button>
           <button class="icon-btn" id="btnZoomOut">－</button>
         </div></div>
 
-        <div class="section" style="--accent:#22c55e"><span class="section-num">4</span><div class="section-row" id="rowDurations"></div></div>
-        <div class="section" style="--accent:#f59e0b"><span class="section-num">5</span><div class="section-row" id="rowRests"></div></div>
-        <div class="section" style="--accent:#06b6d4"><span class="section-num">6</span><div class="section-row" id="rowTimeSigs"></div></div>
-        <div class="section" style="--accent:#0ea5e9"><span class="section-num">7</span><div class="section-row" id="rowClefs"></div></div>
-        <div class="section" style="--accent:#8b5cf6"><span class="section-num">8</span><div class="section-row" id="rowAccidentals"></div></div>
-        <div class="section" style="--accent:#eab308"><span class="section-num">9</span><div class="section-row" id="rowDynamics"></div></div>
+        <div class="section" style="--accent:#22c55e"><span class="section-num">5</span><div class="section-row" id="rowDurations"></div></div>
+        <div class="section" style="--accent:#f59e0b"><span class="section-num">6</span><div class="section-row" id="rowRests"></div></div>
+        <div class="section" style="--accent:#06b6d4"><span class="section-num">7</span><div class="section-row" id="rowTimeSigs"></div></div>
+        <div class="section" style="--accent:#0ea5e9"><span class="section-num">8</span><div class="section-row" id="rowClefs"></div></div>
+        <div class="section" style="--accent:#8b5cf6"><span class="section-num">9</span><div class="section-row" id="rowAccidentals"></div></div>
+        <div class="section" style="--accent:#eab308"><span class="section-num">10</span><div class="section-row" id="rowDynamics"></div></div>
 
       </div>
     </div>
@@ -309,6 +323,7 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
       <span id="instText">Acoustic Grand Piano</span>
       <span class="arp-badge" id="arpBadge"><span class="dot"></span>ARPEGGIO · <span id="arpPatternLabel">PIMA</span></span>
       <span class="tab-badge" id="tabBadge">🎸 TAB</span>
+      <span class="repeat-badge" id="repeatBadge">🔁 REPEAT ACTIVE</span>
       <span class="finger-legend" id="fingerLegend">
         <span style="background:#ef4444;color:#fff">p</span>
         <span style="background:#3b82f6;color:#fff">i</span>
@@ -343,6 +358,7 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
   <button data-sample="birthday" class="samp-item">🎂 Happy Birthday</button>
   <button data-sample="scale" class="samp-item">🎹 C Major Scale</button>
   <button data-sample="mary" class="samp-item">🐑 Mary Had a Little Lamb</button>
+  <button data-sample="repeatdemo" class="samp-item">🔁 Repeat Demo (A–B–A–B)</button>
 </div>
 
 <input type="file" id="fileInput" accept=".xml,.musicxml,.mxl" style="display:none">
@@ -350,10 +366,10 @@ button:focus-visible{outline:2px solid #4dabff;outline-offset:2px}
 
 <script>
 /* ============================================================
-   MAESTRO WEB STUDIO v4.3
-   - Arpeggio is now WRITTEN OUT on the score and TAB
-   - Each arpeggio note appears at its own beat position
-   - Colored by right-hand finger (p/i/m/a)
+   MAESTRO WEB STUDIO v4.4
+   + Working repeat signs (||: ... :||)
+   + Repeat playback loop
+   + Repeat buttons with ▼ / ▲ arrows
    ============================================================ */
 const NS = "http://www.w3.org/2000/svg";
 const DIV = 8;
@@ -395,7 +411,8 @@ const state = {
   selection:null, zoom:1, undo:[], redo:[], drag:null, suppressClick:0,
   userScrollUntil: 0, previewSound: true,
   showTab:false, arpeggio:false, arpPattern:"PIMA",
-  _layout: null   /* visual layout computed on each render */
+  activeMi: 0,   /* measure that the repeat buttons act on */
+  _layout: null
 };
 
 const $ = id => document.getElementById(id);
@@ -403,6 +420,7 @@ const svgRoot = $("score");
 const viewport = $("scoreViewport");
 
 let btnTab = null, btnArp = null, arpSelect = null;
+let btnRepeatStart = null, btnRepeatEnd = null;
 
 function mk(tag, attrs){
   const e = document.createElementNS(NS, tag);
@@ -475,6 +493,8 @@ function makeMeasure(number, prev){
     time: prev ? { ...prev.time } : { beats:4, beatType:4 },
     key:  prev ? prev.key : 0,
     clef: prev ? prev.clef : "treble",
+    repeatStart: false,
+    repeatEnd:   false,
     notes: [] };
 }
 function measureDuration(m){ return m.time.beats * (4 / m.time.beatType) * DIV; }
@@ -535,8 +555,7 @@ function assignString(midi, used){
 }
 
 /* ============================================================
-   ✨ THE KEY: build a VISUAL LAYOUT where arpeggio notes
-   are spread out over time (not stacked as a chord)
+   VISUAL LAYOUT — expands chords into written-out arpeggios
    ============================================================ */
 function buildVisualLayout(){
   const layout = [];
@@ -545,7 +564,6 @@ function buildVisualLayout(){
     const entries = [];
     const groups = new Map();
 
-    /* separate rests and group non-rest notes by start */
     (m.notes||[]).forEach((n, ni) => {
       if(n.rest){
         entries.push({
@@ -561,12 +579,10 @@ function buildVisualLayout(){
     });
 
     groups.forEach((arr, start) => {
-      /* sort chord tones low → high */
       arr.sort((a,b) =>
         pitchToMidi(a.n.step, a.n.octave, a.n.alter||0) -
         pitchToMidi(b.n.step, b.n.octave, b.n.alter||0));
 
-      /* assign string/fret for each chord tone */
       const used = new Set();
       const tabMap = new Map();
       arr.forEach(a => {
@@ -577,13 +593,10 @@ function buildVisualLayout(){
       });
 
       if(state.arpeggio && arr.length >= 2){
-        /* ==================================================
-           EXPAND this chord into a sequence of arpeggio notes
-           ================================================== */
         const pattern = ARP_PATTERNS[state.arpPattern] || ARP_PATTERNS.PIMA;
         const fingers = ARP_FINGERS[state.arpPattern] || ARP_FINGERS.PIMA;
         const origDur = arr[0].n.duration || DIV;
-        const stepDur = origDur / pattern.length;   /* in division units */
+        const stepDur = origDur / pattern.length;
 
         pattern.forEach((idx, k) => {
           const t = arr[Math.min(idx, arr.length - 1)];
@@ -592,8 +605,7 @@ function buildVisualLayout(){
             start: start + k * stepDur,
             isArp: true,
             finger: fingers[k],
-            arpIdx: k,
-            arpPatternIdx: idx,
+            arpIdx: k, arpPatternIdx: idx,
             stepDur: stepDur,
             tab: tabMap.get(t.ni),
             id: `m${mi}_e${t.ni}_a${k}`
@@ -616,6 +628,76 @@ function buildVisualLayout(){
   });
 
   return layout;
+}
+
+/* ============================================================
+   REPEAT LOGIC
+   ============================================================ */
+function hasAnyRepeat(){
+  return state.measures.some(m => m.repeatStart || m.repeatEnd);
+}
+
+function findMatchingStart(endIdx){
+  for(let j = endIdx; j >= 0; j--){
+    if(state.measures[j].repeatStart) return j;
+  }
+  return -1;
+}
+
+/* Returns array of measure indices in play order, with repeats expanded */
+function getPlaybackOrder(){
+  const measures = state.measures;
+  const order = [];
+  const alreadyRepeated = new Set();
+  let i = 0, safety = 0;
+
+  while(i < measures.length && safety++ < 5000){
+    const m = measures[i];
+    order.push(i);
+
+    if(m.repeatEnd){
+      const startIdx = findMatchingStart(i);
+      if(startIdx >= 0 && !alreadyRepeated.has(startIdx)){
+        alreadyRepeated.add(startIdx);
+        i = startIdx;
+        continue;
+      }
+    }
+    i++;
+  }
+  return order;
+}
+
+function toggleRepeatStart(){
+  const mi = state.activeMi;
+  if(mi < 0 || mi >= state.measures.length) return;
+  pushUndo();
+  const m = state.measures[mi];
+  m.repeatStart = !m.repeatStart;
+  render();
+  setStatus(m.repeatStart
+    ? `▼ Repeat START set at measure ${mi+1}`
+    : `Repeat start cleared at measure ${mi+1}`);
+}
+
+function toggleRepeatEnd(){
+  const mi = state.activeMi;
+  if(mi < 0 || mi >= state.measures.length) return;
+  pushUndo();
+  const m = state.measures[mi];
+  m.repeatEnd = !m.repeatEnd;
+  render();
+  setStatus(m.repeatEnd
+    ? `▲ Repeat END set at measure ${mi+1}`
+    : `Repeat end cleared at measure ${mi+1}`);
+}
+
+function clearAllRepeats(){
+  if(!hasAnyRepeat()){ setStatus("No repeat signs to clear"); return; }
+  pushUndo();
+  state.measures.forEach(m => { m.repeatStart = false; m.repeatEnd = false; });
+  render();
+  setStatus("All repeat signs cleared");
 }
 
 /* ============================================================
@@ -718,16 +800,60 @@ function drawKeySig(x, sTop, fifths){
   }
 }
 
+/* draw a repeat START (||: ...) at x — thick | thin | two dots */
+function drawRepeatStartBar(x, y0, y1){
+  svgRoot.appendChild(mk("line", { class:"repeat-line", x1:x, y1:y0, x2:x, y2:y1 }));
+  svgRoot.appendChild(mk("line", { class:"repeat-line-thin", x1:x+7, y1:y0, x2:x+7, y2:y1 }));
+  const sTop = L.STAFF_TOP;
+  const cy1 = sTop + L.STAFF_STEP * 1.55;
+  const cy2 = sTop + L.STAFF_STEP * 2.55;
+  svgRoot.appendChild(mk("circle", { class:"repeat-dot", cx:x+14, cy:cy1, r:2.7 }));
+  svgRoot.appendChild(mk("circle", { class:"repeat-dot", cx:x+14, cy:cy2, r:2.7 }));
+  svgRoot.appendChild(mkText(x+4, y0 - 10, "▼", { class:"repeat-marker", "text-anchor":"middle" }));
+}
+
+/* draw a repeat END (... :||) at x — two dots | thin | thick */
+function drawRepeatEndBar(x, y0, y1){
+  const sTop = L.STAFF_TOP;
+  const cy1 = sTop + L.STAFF_STEP * 1.55;
+  const cy2 = sTop + L.STAFF_STEP * 2.55;
+  svgRoot.appendChild(mk("circle", { class:"repeat-dot", cx:x-14, cy:cy1, r:2.7 }));
+  svgRoot.appendChild(mk("circle", { class:"repeat-dot", cx:x-14, cy:cy2, r:2.7 }));
+  svgRoot.appendChild(mk("line", { class:"repeat-line-thin", x1:x-7, y1:y0, x2:x-7, y2:y1 }));
+  svgRoot.appendChild(mk("line", { class:"repeat-line", x1:x, y1:y0, x2:x, y2:y1 }));
+  svgRoot.appendChild(mkText(x-4, y0 - 10, "▲", { class:"repeat-marker", "text-anchor":"middle" }));
+}
+
 function drawRealBar(mi){
   const m = state.measures[mi];
   const { x0, x1 } = barGeom(mi);
   const sTop = L.STAFF_TOP, sBot = sTop + L.STAFF_H;
   const y0 = sTop, y1 = systemBottom();
 
-  svgRoot.appendChild(mkText(x0 + 6, sTop - 8, String(mi+1), { class:"measure-num" }));
+  /* measure number — clickable to select the measure */
+  const numEl = mkText(x0 + 6, sTop - 8, String(mi+1), {
+    class:"measure-num" + (mi === state.activeMi ? " selected" : "") +
+          ((m.repeatStart || m.repeatEnd) ? " has-repeat" : "")
+  });
+  numEl.style.pointerEvents = "all";
+  numEl.addEventListener("click", ev => {
+    ev.stopPropagation();
+    state.activeMi = mi;
+    render();
+    setStatus(`Measure ${mi+1} selected — use ▼ / ▲ to mark repeat`);
+  });
+  svgRoot.appendChild(numEl);
 
+  /* --- LEFT edge: repeat start barline --- */
+  if(m.repeatStart){
+    drawRepeatStartBar(x0, y0, y1);
+  }
+
+  /* --- RIGHT edge: repeat end, final, or normal barline --- */
   const isLast = (mi === state.measures.length - 1);
-  if(isLast){
+  if(m.repeatEnd){
+    drawRepeatEndBar(x1, y0, y1);
+  } else if(isLast){
     svgRoot.appendChild(mk("line", { class:"bar-line thick", x1:x1-5, y1:y0, x2:x1-5, y2:y1 }));
     svgRoot.appendChild(mk("line", { class:"bar-line thick", x1:x1,   y1:y0, x2:x1,   y2:y1 }));
   } else {
@@ -742,7 +868,6 @@ function drawRealBar(mi){
       { class:"needs-barline", "text-anchor":"middle" }));
   }
 
-  /* ===== draw entries from the visual layout ===== */
   const entries = state._layout?.[mi] || [];
   entries.forEach(entry => {
     const x = startToX(mi, entry.start);
@@ -754,15 +879,16 @@ function drawRealBar(mi){
     if(state.selection && state.selection.entryId === entry.id)
       g.classList.add("note-selected");
 
-    /* click = select (arpeggio entries not draggable to keep it simple) */
     g.addEventListener("pointerdown", ev => {
       if(ev.button && ev.button !== 0) return;
       ev.stopPropagation();
+      state.activeMi = entry.mi;
       if(!entry.isArp) beginDrag(ev, entry.mi, entry.ni, entry.id, g);
     });
     g.addEventListener("click", ev => {
       ev.stopPropagation();
       state.selection = { mi: entry.mi, ni: entry.ni, entryId: entry.id };
+      state.activeMi = entry.mi;
       document.querySelectorAll(".note-selected").forEach(e=>e.classList.remove("note-selected"));
       g.classList.add("note-selected");
       if(!entry.note.rest && state.previewSound){
@@ -799,7 +925,6 @@ function drawGhostBar(mi){
   svgRoot.appendChild(mkText((x0+x1)/2, L.STAFF_TOP + L.STAFF_H/2 + 10, "+", { class:"ghost-plus" }));
 }
 
-/* ---------- draw a note from a layout entry ---------- */
 function drawNoteEntry(g, x, entry, m){
   const note = entry.note;
   const sTop = L.STAFF_TOP;
@@ -816,7 +941,6 @@ function drawNoteEntry(g, x, entry, m){
   const dia = pitchToDia(note.step, note.octave);
   const y = diatonicY(dia);
 
-  /* for arpeggio entries, use the STEP duration for the visual note */
   const visualDur = entry.isArp ? entry.stepDur : note.duration;
   const q = visualDur / DIV;
   const isWhole = q >= 4;
@@ -879,7 +1003,6 @@ function drawNoteEntry(g, x, entry, m){
   if(isArp){
     g.classList.add("arp-note");
     g.classList.add(FINGER_ARP_CLASS[primary] || "arp-fp");
-    /* finger letter above/below the note */
     g.appendChild(mkText(x, y - (stemDown ? 46 : -30), primary, {
       class: "staff-finger " + (FINGER_CLASS[primary] || ""),
       "text-anchor": "middle"
@@ -887,7 +1010,6 @@ function drawNoteEntry(g, x, entry, m){
   }
 }
 
-/* ---------- draw a TAB entry ---------- */
 function drawTabEntry(g, x, entry){
   if(!entry.tab) return;
   const y = tabYForString(entry.tab.s);
@@ -899,7 +1021,6 @@ function drawTabEntry(g, x, entry){
     g.appendChild(mk("circle", { cx:x, cy:y, r:10, class: "tab-halo " + tabCls }));
     g.appendChild(mkText(x, y + 4.5, String(entry.tab.fret),
       { class:"tab-num-arp " + tabCls, "text-anchor":"middle" }));
-    /* finger letter below */
     g.appendChild(mkText(x, y + 18, primary,
       { class:"tab-finger " + (FINGER_CLASS[primary] || ""), "text-anchor":"middle" }));
   } else {
@@ -960,6 +1081,7 @@ svgRoot.addEventListener("click", ev => {
   const mi = Math.floor(relX / L.BAR_W);
 
   pushUndo();
+  state.activeMi = mi;
 
   while(state.measures.length <= mi){
     const prev = state.measures[state.measures.length-1];
@@ -1104,7 +1226,7 @@ function onDragEnd(ev){
 }
 
 /* ============================================================
-   AUDIO — smooth envelopes, no clicks
+   AUDIO — smooth envelopes
    ============================================================ */
 let audioCtx = null, masterGain = null;
 let playing = false, animFrame = null, playback = null;
@@ -1232,12 +1354,15 @@ function instrumentName(){
   return "piano";
 }
 
-/* ---------- TIMELINE — uses the visual layout ---------- */
+/* ---------- TIMELINE with repeat expansion ---------- */
 function buildTimeline(){
   const items = [];
+  const order = getPlaybackOrder();
   let pos = 0;
 
-  state.measures.forEach((m, mi) => {
+  order.forEach(mi => {
+    const m = state.measures[mi];
+    if(!m) return;
     const div = m.divisions || DIV;
     const mBeats = m.time.beats * 4 / m.time.beatType;
     const entries = state._layout?.[mi] || [];
@@ -1246,27 +1371,23 @@ function buildTimeline(){
       if(entry.note.rest) return;
       const midi = pitchToMidi(entry.note.step, entry.note.octave, entry.note.alter||0);
       const startBeat = pos + entry.start / div;
-
       let durBeat;
       if(entry.isArp){
-        /* sustain a bit longer than the step so notes ring out */
         durBeat = Math.max(0.15, (entry.stepDur * 1.8) / div);
       } else {
         durBeat = Math.max(0.10, (entry.note.duration || div) / div);
       }
-
       items.push({
         mi, ni: entry.ni, id: entry.id,
         midi, rest: false,
-        startBeat,
-        durBeat
+        startBeat, durBeat
       });
     });
 
     pos += mBeats;
   });
 
-  return { items, totalBeats: pos };
+  return { items, totalBeats: pos, order };
 }
 
 function togglePlay(){ playing ? stopPlayback() : startPlayback(); }
@@ -1276,7 +1397,7 @@ function startPlayback(){
   initAudio();
   if(audioCtx.state === "suspended") audioCtx.resume();
 
-  const { items, totalBeats } = buildTimeline();
+  const { items, totalBeats, order } = buildTimeline();
   const audible = items.filter(i => !i.rest);
   if(!audible.length){ setStatus("No notes to play"); return; }
 
@@ -1290,10 +1411,9 @@ function startPlayback(){
   audible.forEach(it => synth(freqOf(it.midi), t0 + it.startBeat * spb,
                              it.durBeat * spb * 0.95, inst));
 
-  playback = { items, t0, spb, totalBeats, snap:true };
-  setStatus(state.arpeggio && guitarMode()
-    ? "Playing… guitar • " + state.arpPattern
-    : "Playing…");
+  playback = { items, t0, spb, totalBeats, snap:true, order };
+  const repeatInfo = hasAnyRepeat() ? ` 🔁 (order: ${order.map(i => i+1).join("→")})` : "";
+  setStatus("Playing…" + repeatInfo);
   animFrame = requestAnimationFrame(loop);
 }
 
@@ -1382,13 +1502,21 @@ function syncArpUI(){
 
   const arpBadge = $("arpBadge");
   const tabBadge = $("tabBadge");
+  const repBadge = $("repeatBadge");
   if(arpBadge) arpBadge.classList.toggle("on", state.arpeggio);
   if(tabBadge) tabBadge.classList.toggle("on", state.showTab);
+  if(repBadge) repBadge.classList.toggle("on", hasAnyRepeat());
   const lbl = $("arpPatternLabel");
   if(lbl) lbl.textContent = state.arpPattern;
 
   const fl = $("fingerLegend");
   if(fl) fl.style.display = state.arpeggio ? "flex" : "none";
+
+  /* repeat buttons reflect current measure's state */
+  const mi = state.activeMi;
+  const m = state.measures[mi];
+  if(btnRepeatStart) btnRepeatStart.classList.toggle("active", !!(m && m.repeatStart));
+  if(btnRepeatEnd)   btnRepeatEnd.classList.toggle("active",   !!(m && m.repeatEnd));
 }
 
 function buildToolbar(){
@@ -1510,7 +1638,7 @@ function buildToolbar(){
     rowDyn.appendChild(b);
   });
 
-  /* ----- section 1 : TAB + ARP ----- */
+  /* ===== SECTION 1 : TAB + ARP ===== */
   const rowArp = $("rowArp");
 
   btnTab = document.createElement("button");
@@ -1563,6 +1691,45 @@ function buildToolbar(){
   btnArpDemo.title = "Load an arpeggio study (I–V–vi–IV)";
   btnArpDemo.onclick = loadArpDemo;
   rowArp.appendChild(btnArpDemo);
+
+  /* ===== SECTION 2 : REPEAT ===== */
+  const rowRep = $("rowRepeat");
+
+  btnRepeatStart = document.createElement("button");
+  btnRepeatStart.id = "btnRepeatStart";
+  btnRepeatStart.className = "icon-btn wide";
+  btnRepeatStart.title = "Mark start of repeat section on current measure (▼)";
+  btnRepeatStart.innerHTML = '<span style="font-size:14px;margin-right:4px">▼</span>Start';
+  btnRepeatStart.onclick = toggleRepeatStart;
+  rowRep.appendChild(btnRepeatStart);
+
+  btnRepeatEnd = document.createElement("button");
+  btnRepeatEnd.id = "btnRepeatEnd";
+  btnRepeatEnd.className = "icon-btn wide";
+  btnRepeatEnd.title = "Mark end of repeat section on current measure (▲)";
+  btnRepeatEnd.innerHTML = 'End<span style="font-size:14px;margin-left:4px">▲</span>';
+  btnRepeatEnd.onclick = toggleRepeatEnd;
+  rowRep.appendChild(btnRepeatEnd);
+
+  const btnRepeatClear = document.createElement("button");
+  btnRepeatClear.className = "icon-btn wide";
+  btnRepeatClear.textContent = "✕ Clear";
+  btnRepeatClear.title = "Remove all repeat marks from every measure";
+  btnRepeatClear.onclick = clearAllRepeats;
+  rowRep.appendChild(btnRepeatClear);
+
+  const targetLabel = document.createElement("span");
+  targetLabel.className = "repeat-target";
+  targetLabel.id = "repeatTargetLabel";
+  targetLabel.innerHTML = 'On: <b>1</b>';
+  rowRep.appendChild(targetLabel);
+
+  const btnRepDemo = document.createElement("button");
+  btnRepDemo.className = "icon-btn wide";
+  btnRepDemo.textContent = "Demo";
+  btnRepDemo.title = "Load a piece with an A–B repeat";
+  btnRepDemo.onclick = loadRepeatDemo;
+  rowRep.appendChild(btnRepDemo);
 }
 
 function makeNoteIcon(type, isRest){
@@ -1607,7 +1774,7 @@ function makeNoteIcon(type, isRest){
 }
 
 /* ============================================================
-   ARPEGGIO DEMO — plain block chords, will be expanded live
+   ARPEGGIO DEMO
    ============================================================ */
 const ARP_DEMO = [
   [48,52,55,60],
@@ -1623,36 +1790,77 @@ const ARP_DEMO = [
 function loadArpDemo(){
   stopPlayback(false);
   pushUndo();
-
   state.measures = ARP_DEMO.map((chord, i) => ({
     number: i + 1,
     divisions: DIV,
     time: { beats:4, beatType:4 },
-    key: 0,
-    clef: "treble",
+    key: 0, clef: "treble",
+    repeatStart: false, repeatEnd: false,
     notes: chord.map(midi => {
       const p = midiToPitch(midi);
       return { step:p.step, octave:p.octave, alter:p.alter,
                start:0, duration: DIV*4, rest:false };
     })
   }));
-
   state.title = "Arpeggio Study";
-  state.tempo = 90;
-  state.tempoText = "Andante";
-  state.selection = null;
+  state.tempo = 90; state.tempoText = "Andante";
+  state.selection = null; state.activeMi = 0;
   state.arpeggio = true;
   if(guitarMode()) state.showTab = true;
-
   render();
   viewport.scrollLeft = 0;
-
-  const n = countArpeggioNotes();
-  setStatus(`Arpeggio demo — ${n} notes written out, each colored by finger (p/i/m/a). Press ▶`);
+  setStatus(`Arpeggio demo — ${countArpeggioNotes()} notes written out. Press ▶`);
 }
 
 /* ============================================================
-   IMPORT / EXPORT
+   REPEAT DEMO — measures 1–4 with a repeat sign around 1–2
+   ============================================================ */
+function loadRepeatDemo(){
+  stopPlayback(false);
+  pushUndo();
+
+  /* Simple folk-like melody:  A A B A  |  C C D D   (repeat first 4) */
+  const seq = [
+    /* M1 */ [ {p:["C",5],d:4}, {p:["D",5],d:4}, {p:["E",5],d:8} ],
+    /* M2 */ [ {p:["E",5],d:4}, {p:["D",5],d:4}, {p:["C",5],d:8} ],
+    /* M3 */ [ {p:["E",5],d:4}, {p:["F",5],d:4}, {p:["G",5],d:8} ],
+    /* M4 */ [ {p:["G",5],d:4}, {p:["F",5],d:4}, {p:["E",5],d:8} ],
+    /* M5 */ [ {p:["C",5],d:4}, {p:["C",5],d:4}, {p:["G",4],d:8} ],
+    /* M6 */ [ {p:["A",4],d:4}, {p:["A",4],d:4}, {p:["G",4],d:8} ]
+  ];
+
+  state.measures = seq.map((notes, i) => {
+    const m = makeMeasure(i + 1);
+    let cursor = 0;
+    notes.forEach(nn => {
+      m.notes.push({
+        step: nn.p[0], octave: nn.p[1], alter: 0,
+        start: cursor, duration: nn.d,
+        rest: false, dotted: false, tuplet: 0, dynamic: ""
+      });
+      cursor += nn.d;
+    });
+    return m;
+  });
+
+  /* mark repeat start on M1 and repeat end on M4 */
+  state.measures[0].repeatStart = true;
+  state.measures[3].repeatEnd   = true;
+
+  state.title = "Repeat Demo (A–B–A–B)";
+  state.tempo = 110;
+  state.tempoText = "Moderato";
+  state.selection = null;
+  state.activeMi = 0;
+
+  render();
+  viewport.scrollLeft = 0;
+  const order = getPlaybackOrder();
+  setStatus(`Repeat demo loaded — playback order: ${order.map(i=>i+1).join("→")} (press ▶)`);
+}
+
+/* ============================================================
+   IMPORT / EXPORT (with repeat support)
    ============================================================ */
 $("fileInput").addEventListener("change", async e => {
   const f = e.target.files[0]; if(!f) return;
@@ -1726,6 +1934,20 @@ function importMusicXML(text){
         if(s) clef = s.textContent === "F" ? "bass" : (s.textContent === "C" ? "alto" : "treble");
       }
     }
+
+    /* NEW: read repeat barlines */
+    let repeatStart = false, repeatEnd = false;
+    [...mn.children].forEach(node => {
+      if(node.localName !== "barline") return;
+      const loc = node.getAttribute("location");
+      const rep = node.querySelector(":scope > repeat");
+      if(rep){
+        const dir = rep.getAttribute("direction");
+        if(dir === "forward"  && loc === "left")  repeatStart = true;
+        if(dir === "backward" && loc === "right") repeatEnd   = true;
+      }
+    });
+
     const notes = [];
     let cursor = 0, lastStart = 0;
     [...mn.children].forEach(node => {
@@ -1753,12 +1975,14 @@ function importMusicXML(text){
     });
     notes.sort((a,b) => (a.start||0) - (b.start||0));
     return { number: Number(mn.getAttribute("number")) || mi+1,
-      divisions, time:{beats, beatType}, key:fifths, clef, notes };
+      divisions, time:{beats, beatType}, key:fifths, clef,
+      repeatStart, repeatEnd, notes };
   });
 
   pushUndo();
   state.measures = parsed;
   state.selection = null;
+  state.activeMi = 0;
 
   const pn = doc.querySelector("part-name")?.textContent || "";
   if(/guitar/i.test(pn)){
@@ -1769,8 +1993,10 @@ function importMusicXML(text){
 
   render();
   viewport.scrollLeft = 0;
-  setStatus(`✅ Imported ${state.measures.length} bars from "${state.title}"`
-    + (state.showTab ? "  🎸 TAB active" : ""));
+  const repInfo = hasAnyRepeat()
+    ? `  🔁 order: ${getPlaybackOrder().map(i=>i+1).join("→")}`
+    : "";
+  setStatus(`✅ Imported ${state.measures.length} bars from "${state.title}"${repInfo}`);
 }
 
 function exportMusicXML(){
@@ -1798,6 +2024,12 @@ function exportMusicXML(){
 </attributes>`;
       if(mi === 0) xml += `<sound tempo="${state.tempo}"/>`;
     }
+
+    /* NEW: repeat barlines */
+    if(m.repeatStart){
+      xml += `<barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>`;
+    }
+
     let cursor = 0;
     (m.notes||[]).slice().sort((a,b) => (a.start||0)-(b.start||0)).forEach(n => {
       const start = n.start || 0;
@@ -1823,6 +2055,13 @@ function exportMusicXML(){
       }
       if(!isChord) cursor = start + dur;
     });
+
+    if(m.repeatEnd){
+      xml += `<barline location="right"><bar-style>light-heavy</bar-style><repeat direction="backward"/></barline>`;
+    } else if(mi === state.measures.length - 1){
+      xml += `<barline location="right"><bar-style>light-heavy</bar-style></barline>`;
+    }
+
     xml += `</measure>`;
   });
   xml += `\n</part>\n</score-partwise>`;
@@ -1838,7 +2077,7 @@ function exportMusicXML(){
 }
 
 /* ============================================================
-   SAMPLES (unchanged)
+   SAMPLES (kept from previous version)
    ============================================================ */
 const SAMPLES = {
   twinkle: `<?xml version="1.0" encoding="UTF-8"?>
@@ -1847,6 +2086,7 @@ const SAMPLES = {
 <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
 <part id="P1">
 <measure number="1"><attributes><divisions>1</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes><sound tempo="110"/>
+<barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>
 <note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
 <note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
 <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
@@ -1860,7 +2100,8 @@ const SAMPLES = {
 <note><pitch><step>E</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note></measure>
 <measure number="4"><note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
 <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
-<note><pitch><step>C</step><octave>4</octave></pitch><duration>2</duration><type>half</type></note></measure>
+<note><pitch><step>C</step><octave>4</octave></pitch><duration>2</duration><type>half</type></note>
+<barline location="right"><bar-style>light-heavy</bar-style><repeat direction="backward"/></barline></measure>
 </part></score-partwise>`,
   ode: `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
@@ -2000,7 +2241,11 @@ $("btnRedo").onclick = () => redo();
 $("sampleMenu").querySelectorAll("[data-sample]").forEach(btn => {
   btn.onclick = () => {
     try {
-      importMusicXML(SAMPLES[btn.dataset.sample]);
+      if(btn.dataset.sample === "repeatdemo"){
+        loadRepeatDemo();
+      } else {
+        importMusicXML(SAMPLES[btn.dataset.sample]);
+      }
       $("sampleMenu").style.display = "none";
     } catch(err){ alert("Error: " + err.message); }
   };
@@ -2018,7 +2263,7 @@ $("btnZoomOut").onclick = () => { state.zoom = clamp(state.zoom - 0.1, 0.4, 2.5)
 
 $("btnSettings").onclick = () => {
   const choice = prompt(
-    "Maestro Web Studio v4.3\n────────────────────\nCommands:\n  open / export / print / new / undo / redo / addbars\n  tab / arp / guitar / piano", "");
+    "Maestro Web Studio v4.4\n────────────────────\nCommands:\n  open / export / print / new / undo / redo / addbars\n  tab / arp / guitar / piano\n  repeatstart / repeatend / clearrepeats", "");
   if(!choice) return;
   const c = choice.trim().toLowerCase();
   if(c === "open") $("fileInput").click();
@@ -2032,6 +2277,9 @@ $("btnSettings").onclick = () => {
   else if(c === "arp"){ state.arpeggio = !state.arpeggio; render(); }
   else if(c === "guitar"){ state.instrument="Nylon Guitar"; state.showTab=true; state.arpeggio=true; render(); }
   else if(c === "piano"){ state.instrument="Acoustic Grand Piano"; state.showTab=false; render(); }
+  else if(c === "repeatstart") toggleRepeatStart();
+  else if(c === "repeatend") toggleRepeatEnd();
+  else if(c === "clearrepeats") clearAllRepeats();
 };
 $("btnCollapse").onclick = () => { $("toolbarTrack").style.transform = "translateX(0)"; setStatus("Toolbar collapsed"); };
 $("btnRecord").onclick = () => setStatus("Record — not available in web version");
@@ -2061,6 +2309,10 @@ document.addEventListener("keydown", e => {
   if(e.key.toLowerCase() === "a" && !e.ctrlKey && !e.metaKey){
     e.preventDefault(); state.arpeggio = !state.arpeggio; render(); return;
   }
+  /* Repeat shortcuts */
+  if(e.key === "[" ){ e.preventDefault(); toggleRepeatStart(); return; }
+  if(e.key === "]" ){ e.preventDefault(); toggleRepeatEnd(); return; }
+
   if(e.key.toLowerCase() === "r" && !e.ctrlKey && !e.metaKey){ e.preventDefault(); $("rowRests").children[2].click(); return; }
 
   if(!state.selection) return;
@@ -2108,13 +2360,22 @@ document.body.addEventListener("pointerdown", () => {
 }, {once:true});
 
 /* ============================================================
+   update repeat target label whenever render() runs
+   ============================================================ */
+const _origSyncArpUI = syncArpUI;
+syncArpUI = function(){
+  _origSyncArpUI();
+  const lbl = document.getElementById("repeatTargetLabel");
+  if(lbl) lbl.innerHTML = 'On: <b>' + (state.activeMi + 1) + '</b>';
+};
+
+/* ============================================================
    BOOT
    ============================================================ */
 buildToolbar();
 state.measures = [makeMeasure(1)];
 render();
-setStatus("Ready — 🎸 pick Guitar for TAB · ✨ ARP to write out arpeggios · ▶ to hear");
+setStatus("Ready — click the staff to add a note · 🔁 use ▼ / ▲ to add repeats · ▶ to play");
 </script>
 </body>
 </html>
-
